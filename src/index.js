@@ -5,6 +5,13 @@ const typeDefs = gql`
   type Query {
     hello: String!
   }
+  type User {
+    id: ID!
+    username: String!
+  }
+  type Mutation {
+    register: User
+  }
 `;
 
 /* resolvers  */
@@ -12,6 +19,12 @@ const typeDefs = gql`
 const resolvers =  {
   Query : {
     hello : () => "Hola mundo en graph ql"
+  },
+  Mutation : {
+    register: ()=>({
+      id: 1,
+      username: "bob"
+    })
   }
 }
 
