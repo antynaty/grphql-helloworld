@@ -1,9 +1,9 @@
-const {ApolloServer , gql} = require('apollo-server');
+const { ApolloServer, gql } = require('apollo-server');
 
 /* type defs */
 const typeDefs = gql`
   type Query {
-    hello: String!
+    hello(name: String!): String!
     user: User!
   }
   type User {
@@ -25,36 +25,41 @@ const typeDefs = gql`
   }
   type Mutation {
     register(userInfo: UserInfo!): RegisterResponse!
-    Login(userInfo: UserInfo!): Boolean!
+    login(userInfo: UserInfo!): String!
   }
 `;
 
 /* resolvers  */
 
-const resolvers =  {
-  Query : {
-    hello : () => "Hola mundo en graph ql",
-    user : () => ({
+const resolvers = {
+  Query: {
+    hello: (parent, args) => {
+      return `Hello ${args.name}`
+    },
+    user: () => ({
       id: 1,
       username: "Bob"
     })
   },
-  Mutation : {
-    register: ()=>({
-      user : {
+  Mutation: {
+    register: () => ({
+      user: {
         id: 1,
         username: "bob"
       },
-      errors : [{
+      errors: [{
         field: "username",
-        message : "Error"
-      },null]
-    })
+        message: "Error"
+      }, null]
+    }),
+    login: (parent, { userInfo: { username } }, context, info) => {
+      return username
+    }
   }
 }
 
 const server = new ApolloServer({ typeDefs, resolvers });
 
 server.listen().then(
-  ({url})=> console.log(`Server running at ${url}`)
+  ({ url }) => console.log(`Server running at ${url}`)
 );
