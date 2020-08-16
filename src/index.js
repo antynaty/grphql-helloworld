@@ -32,6 +32,9 @@ const typeDefs = gql`
 /* resolvers  */
 
 const resolvers = {
+  User: {
+    username:()=>"hola ya no soy bob"
+  },
   Query: {
     hello: (parent, args,context) => {
       console.log(context);
@@ -53,7 +56,9 @@ const resolvers = {
         message: "Error"
       }, null]
     }),
-    login: (parent, { userInfo: { username } }, context, info) => {
+    login: async (parent, { userInfo: { username } }, context, info) => {
+      // check auth or password
+      // await checkPassword(password)
       return username
     }
   }
