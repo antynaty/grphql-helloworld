@@ -33,7 +33,8 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    hello: (parent, args) => {
+    hello: (parent, args,context) => {
+      console.log(context);
       return `Hello ${args.name}`
     },
     user: () => ({
@@ -58,7 +59,7 @@ const resolvers = {
   }
 }
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ typeDefs, resolvers, context: ({req,res})=>({req,res}) });
 
 server.listen().then(
   ({ url }) => console.log(`Server running at ${url}`)
