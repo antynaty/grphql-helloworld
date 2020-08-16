@@ -17,8 +17,14 @@ const typeDefs = gql`
     errors: [Error] 
     user: User!
   }
+  input UserInfo {
+    username: String!
+    password: String!
+    age: Int
+  }
   type Mutation {
-    register(username: String!, password: String!, age: Int): RegisterResponse!
+    register(userInfo: UserInfo!): RegisterResponse!
+    Login(userInfo: UserInfo!): Boolean!
   }
 `;
 
