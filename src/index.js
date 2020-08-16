@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer, gql, PubSub } = require('apollo-server');
 
 /* type defs */
 const typeDefs = gql`
@@ -9,7 +9,7 @@ const typeDefs = gql`
   type User {
     id: ID!
     username: String
-    firstLetterOfUsernmae: String
+    firstLetterOfUsername: String
   }
   type Error {
     field: String!
@@ -28,15 +28,24 @@ const typeDefs = gql`
     register(userInfo: UserInfo!): RegisterResponse!
     login(userInfo: UserInfo!): String!
   }
+  type Subscription {
+    newUser: User!
+  }
 `;
 
+const NEW_USER_KEY = "USER_KEY";
 /* resolvers  */
 
 const resolvers = {
+  Subscription: {
+    newUser: {
+      subscribe: (_, __, { pubsub }) => pubsub.asyncIterator(NEW_USER_KEY)
+    }
+  },
   User: {
-    firstLetterOfUsernmae: (parent) => {
+    firstLetterOfUsername: (parent) => {
       return parent.username ? parent.username[0] : null
-    } 
+    }
   },
   Query: {
     hello: (parent, args, context) => {
@@ -49,16 +58,24 @@ const resolvers = {
     })
   },
   Mutation: {
-    register: () => ({
-      user: {
+    register: (_, { userInfo: { username } }, { pubsub }) => {
+      const user = {
         id: 1,
-        username: "bob"
-      },
-      errors: [{
-        field: "username",
-        message: "Error"
-      }, null]
-    }),
+        username
+      };
+
+      pubsub.publish(NEW_USER_KEY, {
+        newUser: user
+      });
+
+      return {
+        user,
+        errors: [{
+          field: "username",
+          message: "Error"
+        }, null]
+      }
+    },
     login: async (parent, { userInfo: { username } }, context, info) => {
       // check auth or password
       // await checkPassword(password)
@@ -67,7 +84,8 @@ const resolvers = {
   }
 }
 
-const server = new ApolloServer({ typeDefs, resolvers, context: ({ req, res }) => ({ req, res }) });
+const pubsub = new PubSub();
+const server = new ApolloServer({ typeDefs, resolvers, context: ({ req, res }) => ({ req, res, pubsub }) });
 
 server.listen().then(
   ({ url }) => console.log(`Server running at ${url}`)
