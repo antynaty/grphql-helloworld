@@ -4,6 +4,7 @@ const {ApolloServer , gql} = require('apollo-server');
 const typeDefs = gql`
   type Query {
     hello: String!
+    user: User!
   }
   type User {
     id: ID!
@@ -32,7 +33,11 @@ const typeDefs = gql`
 
 const resolvers =  {
   Query : {
-    hello : () => "Hola mundo en graph ql"
+    hello : () => "Hola mundo en graph ql",
+    user : () => ({
+      id: 1,
+      username: "Bob"
+    })
   },
   Mutation : {
     register: ()=>({
