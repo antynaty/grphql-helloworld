@@ -8,7 +8,8 @@ const typeDefs = gql`
   }
   type User {
     id: ID!
-    username: String!
+    username: String
+    firstLetterOfUsernmae: String
   }
   type Error {
     field: String!
@@ -33,16 +34,18 @@ const typeDefs = gql`
 
 const resolvers = {
   User: {
-    username:()=>"hola ya no soy bob"
+    firstLetterOfUsernmae: (parent) => {
+      return parent.username ? parent.username[0] : null
+    } 
   },
   Query: {
-    hello: (parent, args,context) => {
+    hello: (parent, args, context) => {
       console.log(context);
       return `Hello ${args.name}`
     },
     user: () => ({
       id: 1,
-      username: "Bob"
+      username: "Tom"
     })
   },
   Mutation: {
@@ -64,7 +67,7 @@ const resolvers = {
   }
 }
 
-const server = new ApolloServer({ typeDefs, resolvers, context: ({req,res})=>({req,res}) });
+const server = new ApolloServer({ typeDefs, resolvers, context: ({ req, res }) => ({ req, res }) });
 
 server.listen().then(
   ({ url }) => console.log(`Server running at ${url}`)
